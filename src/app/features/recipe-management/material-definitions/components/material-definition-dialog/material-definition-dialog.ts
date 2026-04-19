@@ -30,7 +30,6 @@ export class MaterialDefinitionDialog implements OnInit {
 
     ngOnInit(): void {
         const data = this.config.data as MaterialDefinitionDialogData;
-
         if (data) {
             if (data.materialDefinition) {
                 this.isEditMode.set(true);

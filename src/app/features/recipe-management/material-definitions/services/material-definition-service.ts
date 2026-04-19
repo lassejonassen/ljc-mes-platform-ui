@@ -18,6 +18,23 @@ export interface MaterialDefinitionListResponse {
     data: MaterialDefinition[];
 }
 
+export interface MaterialDefinitionPropertyCreateRequest {
+    materialDefinitionId: string;
+    name: string;
+    value: string;
+    dataType?: string;
+    description?: string;
+}
+
+export interface MaterialDefinitionPropertyUpdateRequest {
+    materialDefinitionId: string;
+    propertyId: string;
+    name: string;
+    value: string;
+    dataType?: string;
+    description?: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -33,6 +50,9 @@ export class MaterialDefinitionService {
     private readonly _materialDefinitions = signal<MaterialDefinition[]>([]);
     readonly materialDefinitions = this._materialDefinitions.asReadonly();
 
+    private readonly _materialDefinition = signal<MaterialDefinition | undefined>(undefined);
+    readonly materialDefinition = this._materialDefinition.asReadonly();
+
     getAll(): Observable<MaterialDefinition[]> {
         this.startRequest();
         return this.httpClient.get<MaterialDefinitionListResponse>(this.API_URL).pipe(
@@ -45,7 +65,7 @@ export class MaterialDefinitionService {
     }
 
     getById(id: string | number): Observable<MaterialDefinition> {
-        return this.httpClient.get<MaterialDefinition>(`${this.API_URL}/${id}`);
+        return this.httpClient.get<MaterialDefinition>(`${this.API_URL}/${id}`).pipe(tap((data) => this._materialDefinition.set(data)));
     }
 
     create(request: MaterialDefinitionCreateRequest): Observable<MaterialDefinition> {
@@ -58,6 +78,20 @@ export class MaterialDefinitionService {
             tap((newFullDefinition) => {
                 // Now you are pushing the actual server-validated object into your list
                 this._materialDefinitions.update((items) => [...items, newFullDefinition]);
+            }),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false))
+        );
+    }
+
+    createProperty(id: string, content: MaterialDefinitionPropertyCreateRequest): Observable<MaterialDefinition> {
+        this.startRequest();
+
+        return this.httpClient.post<void>(`${this.API_URL}/${id}/properties`, content).pipe(
+            // switchMap changes the stream type from 'void' to 'MaterialDefinition'
+            switchMap(() => this.getById(id)),
+            tap((updatedDefinition) => {
+                this.syncState(id, updatedDefinition);
             }),
             catchError((err) => this.handleError(err)),
             finalize(() => this.loading.set(false))
@@ -78,11 +112,35 @@ export class MaterialDefinitionService {
         );
     }
 
+    updateProperty(id: string, propertyId: string, content: MaterialDefinitionPropertyUpdateRequest): Observable<MaterialDefinition> {
+        this.startRequest();
+        return this.httpClient.put<void>(`${this.API_URL}/${id}/properties/${propertyId}`, content).pipe(
+            switchMap(() => this.getById(id)),
+            tap((updatedDefinition) => {
+                this.syncState(id, updatedDefinition);
+            }),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false))
+        );
+    }
+
     delete(id: string | number): Observable<void> {
         this.startRequest();
         return this.httpClient.delete<void>(`${this.API_URL}/${id}`).pipe(
             tap(() => {
                 this._materialDefinitions.update((items) => items.filter((item) => item.id !== id));
+            }),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false))
+        );
+    }
+
+    deleteProperty(id: string, propertyId: string): Observable<MaterialDefinition> {
+        this.startRequest();
+        return this.httpClient.delete<void>(`${this.API_URL}/${id}/properties/${propertyId}`).pipe(
+            switchMap(() => this.getById(id)),
+            tap((updatedDefinition) => {
+                this.syncState(id, updatedDefinition);
             }),
             catchError((err) => this.handleError(err)),
             finalize(() => this.loading.set(false))
@@ -102,5 +160,13 @@ export class MaterialDefinitionService {
 
     private getErrorMessage(error: any): string {
         return error?.error?.message || error?.message || 'An unknown error occurred';
+    }
+
+    private syncState(id: string | number, updatedDefinition: MaterialDefinition): void {
+        // 1. Update the single "currently viewed" definition signal
+        this._materialDefinition.set(updatedDefinition);
+
+        // 2. Update the specific item in the list signal
+        this._materialDefinitions.update((items) => items.map((item) => (item.id === id ? updatedDefinition : item)));
     }
 }
