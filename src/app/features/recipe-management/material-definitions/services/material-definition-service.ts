@@ -9,6 +9,14 @@ export interface MaterialDefinitionCreateRequest {
     name: string;
 }
 
+export interface MaterialDefinitionCreateDraftRequest {
+    materialDefinitionId: string;
+}
+
+export interface MaterialDefinitionReleaseRequest {
+    id: string;
+}
+
 export interface MaterialDefinitionUpdateRequest {
     id: string;
     name: string;
@@ -84,6 +92,22 @@ export class MaterialDefinitionService {
         );
     }
 
+    createDraft(id: string, request: MaterialDefinitionCreateDraftRequest): Observable<MaterialDefinition> {
+        this.startRequest();
+
+        return this.httpClient.post<string>(`${this.API_URL}/${id}/drafts`, request).pipe(
+            // switchMap "switches" the stream from the ID response to the GetById response
+            switchMap((res) => this.getById(res)),
+
+            tap((newFullDefinition) => {
+                // Now you are pushing the actual server-validated object into your list
+                this._materialDefinitions.update((items) => [...items, newFullDefinition]);
+            }),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false))
+        );
+    }
+
     createProperty(id: string, content: MaterialDefinitionPropertyCreateRequest): Observable<MaterialDefinition> {
         this.startRequest();
 
@@ -92,6 +116,20 @@ export class MaterialDefinitionService {
             switchMap(() => this.getById(id)),
             tap((updatedDefinition) => {
                 this.syncState(id, updatedDefinition);
+            }),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false))
+        );
+    }
+
+    release(id: string | number, content: MaterialDefinitionReleaseRequest): Observable<void> {
+        this.startRequest();
+
+        // We expect 'void' because of 204 No Content
+        return this.httpClient.patch<void>(`${this.API_URL}/${id}/release`, content).pipe(
+            tap(() => {
+                // Update the local signal using the data we sent to the server
+                this._materialDefinitions.update((items) => items.map((item) => (item.id === id ? { ...item, ...content } : item)));
             }),
             catchError((err) => this.handleError(err)),
             finalize(() => this.loading.set(false))

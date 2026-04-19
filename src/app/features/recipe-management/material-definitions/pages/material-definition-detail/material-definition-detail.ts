@@ -1,7 +1,7 @@
 import { MaterialDefinition } from '@/app/shared/models/recipe-management/material-definitions/material-definition.model';
 import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MaterialDefinitionPropertyCreateRequest, MaterialDefinitionPropertyUpdateRequest, MaterialDefinitionService } from '../../services/material-definition-service';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MaterialDefinitionCreateDraftRequest, MaterialDefinitionPropertyCreateRequest, MaterialDefinitionPropertyUpdateRequest, MaterialDefinitionReleaseRequest, MaterialDefinitionService } from '../../services/material-definition-service';
 import { Table, TableModule } from 'primeng/table';
 import { MaterialDefinitionProperty } from '@/app/shared/models/recipe-management/material-definitions/material-definition-property.model';
 import { MaterialDefinitionPropertyDialogData } from '../../components/material-definition-property-dialog/material-definition-property-dialog-data.model';
@@ -26,7 +26,7 @@ import { InputTextModule } from 'primeng/inputtext';
 })
 export class MaterialDefinitionDetail implements OnInit {
     @ViewChild('dt') dt!: Table;
-
+    private router = inject(Router);
     private route = inject(ActivatedRoute);
     private materialDefinitionService = inject(MaterialDefinitionService);
     private confirmationService = inject(ConfirmationService);
@@ -118,6 +118,64 @@ export class MaterialDefinitionDetail implements OnInit {
     }
 
     exportCSV(): void {}
+
+    openNewReleaseDialog(): void {
+        this.confirmationService.confirm({
+            message: `Are you sure you want to create a new draft of Material Definition: ${this.material()!.sku} (${this.material()!.name}) `,
+            header: 'Danger Zone',
+            icon: 'pi pi-info-circle',
+            rejectLabel: 'Cancel',
+            rejectButtonProps: {
+                label: 'Cancel',
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptButtonProps: {
+                label: 'Create',
+                severity: 'primary'
+            },
+            accept: () => {
+                this.materialDefinitionService.createDraft(this.materialDefinitionId, { materialDefinitionId: this.materialDefinitionId } as MaterialDefinitionCreateDraftRequest).subscribe({
+                    next: (res) => {
+                        this.router.navigate(['/recipe-management/material-definitions', res.id]);
+                        this.showSuccess('Draft created');
+                    }
+                });
+            },
+            reject: () => {
+                this.messageService.add({ severity: 'info', summary: 'Rejected', detail: 'Material Definition new release rejected' });
+            }
+        });
+    }
+
+    openReleaseDialog(): void {
+        this.confirmationService.confirm({
+            message: `Are you sure you want to release Material Definition: ${this.material()!.sku} (${this.material()!.name}) `,
+            header: 'Danger Zone',
+            icon: 'pi pi-info-circle',
+            rejectLabel: 'Cancel',
+            rejectButtonProps: {
+                label: 'Cancel',
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptButtonProps: {
+                label: 'Create',
+                severity: 'primary'
+            },
+            accept: () => {
+                this.materialDefinitionService.release(this.materialDefinitionId, { id: this.materialDefinitionId } as MaterialDefinitionReleaseRequest).subscribe({
+                    next: () => {
+                        this.showSuccess('Released');
+                        this.refresh(); // Now it refreshes AFTER the server is done
+                    }
+                });
+            },
+            reject: () => {
+                this.messageService.add({ severity: 'info', summary: 'Rejected', detail: 'Material Definition release rejected' });
+            }
+        });
+    }
 
     private showSuccess(message: string) {
         this.messageService.add({

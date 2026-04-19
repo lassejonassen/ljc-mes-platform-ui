@@ -37,6 +37,7 @@ export class MaterialDefinitionList implements OnInit {
     loading = this.materialDefinitionService.loading;
     error = this.materialDefinitionService.error;
     selectedNodes!: TreeNode | TreeNode[] | null;
+
     groupedMaterials = computed<TreeNode[]>(() => {
         const raw = this.materials();
         const groups: Record<string, TreeNode> = {};
@@ -47,6 +48,8 @@ export class MaterialDefinitionList implements OnInit {
                     data: {
                         sku: m.sku,
                         name: m.name,
+                        state: m.state,
+                        version: m.version,
                         isGroup: true // Helper flag
                     },
                     children: [],

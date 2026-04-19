@@ -1,0 +1,31 @@
+:host ::v-deep {
+    .custom-align-table {
+        // Ensures the header and body columns have the exact same width distribution
+        .p-treetable-thead > tr > th,
+        .p-treetable-tbody > tr > td {
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .p-treetable-toggler {
+            margin-right: 0.5rem;
+            // Keeps the expand icon from shifting the text too much
+            width: 2rem;
+            height: 2rem;
+        }
+
+        // Add a hover effect to the rows for better UX
+        .p-treetable-tbody > tr:hover {
+            background: var(--surface-hover);
+        }
+    }
+
+    // Specific styling for the Version badge
+    // .font-mono {
+    //     font-family: var(--font-family-mono, monospace);
+    //     font-weight: 500;
+    // }
+}

@@ -3,7 +3,15 @@
     <h2>Details for: {{ item.name }}</h2>
     <p><strong>SKU:</strong> {{ item.sku }}</p>
     <p><strong>Database ID:</strong> {{ item.id }}</p>
-    <button pButton label="Back to List" routerLink="/recipe-management/material-definitions"></button>
+    <p><strong>State:</strong> {{ item.state }}</p>
+    <p><strong>Version:</strong> {{ item.version }}</p>
+    <button class="mr-2" pButton label="Back to List" routerLink="/recipe-management/material-definitions"></button>
+    @if (item.state === 'Released' ) {
+    <p-button [outlined]="true" label="New release" (onClick)="openNewReleaseDialog()"></p-button>
+    } @if (item.state === 'Draft') {
+    <p-button [outlined]="true" label="Release" (onClick)="openReleaseDialog()"></p-button>
+
+    }
 </div>
 
 <div class="card">
