@@ -90,7 +90,7 @@ export class ProcessSegmentService {
     createProperty(id: string, content: ProcessSegmentParameterCreateRequest): Observable<ProcessSegment> {
         this.startRequest();
 
-        return this.httpClient.post<void>(`${this.API_URL}/${id}/properties`, content).pipe(
+        return this.httpClient.post<void>(`${this.API_URL}/${id}/parameters`, content).pipe(
             // switchMap changes the stream type from 'void' to 'MaterialDefinition'
             switchMap(() => this.getById(id)),
             tap((updatedSegment) => {
@@ -117,7 +117,7 @@ export class ProcessSegmentService {
         );
     }
 
-    updateProperty(id: string, parameterId: string, content: ProcessSegmentParameterUpdateRequest): Observable<ProcessSegment> {
+    updateParameter(id: string, parameterId: string, content: ProcessSegmentParameterUpdateRequest): Observable<ProcessSegment> {
         this.startRequest();
         return this.httpClient.put<void>(`${this.API_URL}/${id}/parameters/${parameterId}`, content).pipe(
             switchMap(() => this.getById(id)),

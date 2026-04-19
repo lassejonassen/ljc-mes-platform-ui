@@ -34,7 +34,7 @@ export class MaterialDefinitionDetail implements OnInit {
     private dialogService = inject(DialogService);
 
     material = this.materialDefinitionService.materialDefinition;
-    isLoading = this.materialDefinitionService.loading;
+    loading = this.materialDefinitionService.loading;
     error = this.materialDefinitionService.error;
 
     materialDefinitionId!: string;
