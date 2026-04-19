@@ -1,0 +1,10 @@
+@if (material(); as item) {
+<div class="card">
+    <h2>Details for: {{ item.name }}</h2>
+    <p><strong>SKU:</strong> {{ item.sku }}</p>
+    <p><strong>Database ID:</strong> {{ item.id }}</p>
+    <button pButton label="Back to List" routerLink="/material-definitions"></button>
+</div>
+} @else if (isLoading()) {
+<p>Loading...</p>
+}

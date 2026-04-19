@@ -1,0 +1,63 @@
+<div class="card">
+    <div class="font-semibold text-xl mb-4">Material Definitions</div>
+    <p-toolbar class="mb-6">
+        <ng-template #start>
+            <p-button label="Add" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="showMaterialDefinitionDialog()" />
+            <p-button label="Delete" icon="pi pi-trash" severity="danger" class="mr-2" (onClick)="deleteSelected()" [disabled]="!selectedMaterialDefinitions || !selectedMaterialDefinitions.length" />
+        </ng-template>
+        <ng-template #end>
+            <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+        </ng-template>
+    </p-toolbar>
+    <p-table
+        #dt
+        [value]="materials()"
+        [rows]="10"
+        [paginator]="true"
+        [globalFilterFields]="['sku', 'name']"
+        [tableStyle]="{ 'min-width': '75rem' }"
+        [(selection)]="selectedMaterialDefinitions"
+        [rowHover]="true"
+        dataKey="id"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} materials"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 20, 30]"
+    >
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <h5 class="m-0">Manage Material Defintions</h5>
+                <p-iconfield>
+                    <p-inputicon class="pi pi-search" />
+                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+                </p-iconfield>
+            </div>
+        </ng-template>
+        <ng-template #header>
+            <tr>
+                <th style="width: 3 rem">
+                    <p-tableHeaderCheckbox />
+                </th>
+                <th pSortableColumn="sku" style="min-width: 16rem">SKU <p-sortIcon field="sku" /></th>
+                <th pSortableColumn="name" style="min-width: 16rem">Name <p-sortIcon field="Name" /></th>
+                <th style="min-width: 12rem"></th>
+            </tr>
+        </ng-template>
+        <ng-template #body let-material>
+            <tr>
+                <td style="width: 3rem">
+                    <p-tableCheckbox [value]="material" />
+                </td>
+                <td style="min-width: 12rem">{{ material.sku }}</td>
+                <td style="min-width: 16rem">{{ material.name }}</td>
+                <td>
+                    <p-button icon="pi pi-eye" severity="info" class="mr-2" [rounded]="true" [outlined]="true" [routerLink]="['/recipe-management/material-definitions', material.id]" pTooltip="View Details" />
+                    <p-button icon="pi pi-pencil" severity="warn" class="mr-2" [rounded]="true" [outlined]="true" (click)="showMaterialDefinitionDialog(material)" pTooltip="Edit" />
+                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="openDeleteDialog(material)" pTooltip="Delete" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<p-confirmdialog />
+<p-toast />
