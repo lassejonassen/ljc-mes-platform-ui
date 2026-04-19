@@ -7,10 +7,12 @@
     <p><strong>Version:</strong> {{ item.version }}</p>
     <button class="mr-2" pButton label="Back to List" routerLink="/recipe-management/material-definitions"></button>
     @if (item.state === 'Released' ) {
-    <p-button [outlined]="true" label="New release" (onClick)="openNewReleaseDialog()"></p-button>
+    <p-button class="mr-2" [outlined]="true" label="New release" (onClick)="openNewReleaseDialog()"></p-button>
+    <p-button [outlined]="true" label="Deprecate" severity="warn" (onClick)="openDeprecateDialog()"></p-button>
     } @if (item.state === 'Draft') {
     <p-button [outlined]="true" label="Release" (onClick)="openReleaseDialog()"></p-button>
-
+    } @if (item.state === 'Obsolete') {
+    <p-button class="mr-2" [outlined]="true" label="New release" (onClick)="openNewReleaseDialog()"></p-button>
     }
 </div>
 
@@ -18,8 +20,8 @@
     <div class="font-semibold text-xl mb-4">Material Definition Properties</div>
     <p-toolbar class="mb-6">
         <ng-template #start>
-            <p-button label="Add" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="showMaterialDefinitionPropertyDialog()" />
-            <p-button label="Delete" icon="pi pi-trash" severity="danger" class="mr-2" (onClick)="deleteSelected()" [disabled]="!selectedMaterialDefinitionProperties || !selectedMaterialDefinitionProperties.length" />
+            <p-button label="Add" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="showMaterialDefinitionPropertyDialog()" [pTooltip]="isReadOnly() ? 'Add Unavailable' : 'Add'" [disabled]="isReadOnly" />
+            <p-button label="Delete" icon="pi pi-trash" severity="danger" class="mr-2" (onClick)="deleteSelected()" [disabled]="!selectedMaterialDefinitionProperties || !selectedMaterialDefinitionProperties.length || isReadOnly" />
         </ng-template>
         <ng-template #end>
             <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
@@ -70,8 +72,17 @@
                 <td style="min-width: 12rem">{{ property.value }}</td>
                 <td style="min-width: 12rem">{{ property.dataType }}</td>
                 <td>
-                    <p-button icon="pi pi-pencil" severity="warn" class="mr-2" [rounded]="true" [outlined]="true" (click)="showMaterialDefinitionPropertyDialog(property)" pTooltip="Edit" />
-                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="openDeleteDialog(property)" pTooltip="Delete" />
+                    <p-button
+                        icon="pi pi-pencil"
+                        severity="warn"
+                        class="mr-2"
+                        [rounded]="true"
+                        [outlined]="true"
+                        (click)="showMaterialDefinitionPropertyDialog(property)"
+                        [pTooltip]="isReadOnly() ? 'Edit Unavailable' : 'Edit'"
+                        [disabled]="isReadOnly"
+                    />
+                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="openDeleteDialog(property)" [pTooltip]="isReadOnly() ? 'Delete Unavailable' : 'Delete'" [disabled]="isReadOnly" />
                 </td>
             </tr>
         </ng-template>

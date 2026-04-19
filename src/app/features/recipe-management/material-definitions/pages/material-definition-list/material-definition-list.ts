@@ -39,27 +39,34 @@ export class MaterialDefinitionList implements OnInit {
     selectedNodes!: TreeNode | TreeNode[] | null;
 
     groupedMaterials = computed<TreeNode[]>(() => {
-        const raw = this.materials();
+        const rawData = [...this.materials()];
+
+        // 1. Robust Sort: Handles numbers, strings, and missing values
+        rawData.sort((a, b) => {
+            // Handle null/undefined versions by treating them as empty strings
+            const verA = (a.version ?? '').toString();
+            const verB = (b.version ?? '').toString();
+
+            return verB.localeCompare(verA, undefined, {
+                numeric: true,
+                sensitivity: 'base'
+            });
+        });
+
         const groups: Record<string, TreeNode> = {};
 
-        raw.forEach((m) => {
-            if (!groups[m.sku]) {
-                groups[m.sku] = {
-                    data: {
-                        sku: m.sku,
-                        name: m.name,
-                        state: m.state,
-                        version: m.version,
-                        isGroup: true // Helper flag
-                    },
-                    children: [],
-                    expanded: false
+        // 2. Build the Tree
+        rawData.forEach((item) => {
+            if (!groups[item.sku]) {
+                groups[item.sku] = {
+                    data: { ...item, isGroup: true },
+                    expanded: false,
+                    children: []
                 };
             }
 
-            // Add the version as a child
-            groups[m.sku].children?.push({
-                data: { ...m, isGroup: false }
+            groups[item.sku].children?.push({
+                data: { ...item, isGroup: false }
             });
         });
 

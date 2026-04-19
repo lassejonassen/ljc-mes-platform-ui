@@ -35,9 +35,9 @@
 
         <ng-template #header>
             <tr>
-                <th style="width: 35%">SKU / Name</th>
-                <th style="width: 15%">State</th>
-                <th style="width: 15%">Version</th>
+                <th style="width: 40%">SKU & Name</th>
+                <th style="width: 15%">Latest State</th>
+                <th style="width: 15%">Latest Version</th>
                 <th style="width: 20%">Actions</th>
             </tr>
         </ng-template>
@@ -56,14 +56,10 @@
                     </div>
                 </td>
                 <td style="width: 15%">
-                    @if (!rowData.isGroup) {
                     <p-tag [value]="rowData.state" [severity]="getSeverity(rowData.state)" />
-                    }
                 </td>
                 <td style="width: 15%">
-                    @if (!rowData.isGroup) {
                     <span class="version-badge"> v{{ rowData.version }} </span>
-                    }
                 </td>
                 <td style="width: 20%">
                     @if (!rowData.isGroup) {
@@ -72,6 +68,8 @@
                         <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="warn" (onClick)="showMaterialDefinitionDialog(rowData)" pTooltip="Edit Version" />
                         <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="openDeleteDialog(rowData)" pTooltip="Delete Version" />
                     </div>
+                    } @else {
+                    <span class="text-xs text-400 italic">Expand to manage versions</span>
                     }
                 </td>
             </tr>

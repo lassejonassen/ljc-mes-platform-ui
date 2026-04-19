@@ -17,6 +17,10 @@ export interface MaterialDefinitionReleaseRequest {
     id: string;
 }
 
+export interface MaterialDefinitionDeprecateRequest {
+    id: string;
+}
+
 export interface MaterialDefinitionUpdateRequest {
     id: string;
     name: string;
@@ -127,6 +131,20 @@ export class MaterialDefinitionService {
 
         // We expect 'void' because of 204 No Content
         return this.httpClient.patch<void>(`${this.API_URL}/${id}/release`, content).pipe(
+            tap(() => {
+                // Update the local signal using the data we sent to the server
+                this._materialDefinitions.update((items) => items.map((item) => (item.id === id ? { ...item, ...content } : item)));
+            }),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false))
+        );
+    }
+
+    deprecate(id: string | number, content: MaterialDefinitionDeprecateRequest): Observable<void> {
+        this.startRequest();
+
+        // We expect 'void' because of 204 No Content
+        return this.httpClient.patch<void>(`${this.API_URL}/${id}/deprecate`, content).pipe(
             tap(() => {
                 // Update the local signal using the data we sent to the server
                 this._materialDefinitions.update((items) => items.map((item) => (item.id === id ? { ...item, ...content } : item)));

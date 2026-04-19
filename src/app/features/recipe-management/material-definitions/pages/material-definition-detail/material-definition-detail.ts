@@ -1,7 +1,14 @@
 import { MaterialDefinition } from '@/app/shared/models/recipe-management/material-definitions/material-definition.model';
-import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MaterialDefinitionCreateDraftRequest, MaterialDefinitionPropertyCreateRequest, MaterialDefinitionPropertyUpdateRequest, MaterialDefinitionReleaseRequest, MaterialDefinitionService } from '../../services/material-definition-service';
+import {
+    MaterialDefinitionCreateDraftRequest,
+    MaterialDefinitionDeprecateRequest,
+    MaterialDefinitionPropertyCreateRequest,
+    MaterialDefinitionPropertyUpdateRequest,
+    MaterialDefinitionReleaseRequest,
+    MaterialDefinitionService
+} from '../../services/material-definition-service';
 import { Table, TableModule } from 'primeng/table';
 import { MaterialDefinitionProperty } from '@/app/shared/models/recipe-management/material-definitions/material-definition-property.model';
 import { MaterialDefinitionPropertyDialogData } from '../../components/material-definition-property-dialog/material-definition-property-dialog-data.model';
@@ -36,6 +43,11 @@ export class MaterialDefinitionDetail implements OnInit {
     material = this.materialDefinitionService.materialDefinition;
     loading = this.materialDefinitionService.loading;
     error = this.materialDefinitionService.error;
+
+    isReadOnly = computed(() => {
+        const state = this.material()?.state?.toLowerCase();
+        return state === 'released' || state === 'obsolete';
+    });
 
     materialDefinitionId!: string;
     selectedMaterialDefinitionProperties!: MaterialDefinitionProperty[] | null;
@@ -173,6 +185,35 @@ export class MaterialDefinitionDetail implements OnInit {
             },
             reject: () => {
                 this.messageService.add({ severity: 'info', summary: 'Rejected', detail: 'Material Definition release rejected' });
+            }
+        });
+    }
+
+    openDeprecateDialog(): void {
+        this.confirmationService.confirm({
+            message: `Are you sure you want to deprecate Material Definition: ${this.material()!.sku} (${this.material()!.name}) `,
+            header: 'Danger Zone',
+            icon: 'pi pi-info-circle',
+            rejectLabel: 'Cancel',
+            rejectButtonProps: {
+                label: 'Cancel',
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptButtonProps: {
+                label: 'Create',
+                severity: 'primary'
+            },
+            accept: () => {
+                this.materialDefinitionService.deprecate(this.materialDefinitionId, { id: this.materialDefinitionId } as MaterialDefinitionDeprecateRequest).subscribe({
+                    next: () => {
+                        this.showSuccess('Deprecated');
+                        this.refresh(); // Now it refreshes AFTER the server is done
+                    }
+                });
+            },
+            reject: () => {
+                this.messageService.add({ severity: 'info', summary: 'Rejected', detail: 'Material Definition deprecation rejected' });
             }
         });
     }
