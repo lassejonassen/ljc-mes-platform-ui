@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, computed, inject, OnInit, ViewChild } from '@angular/core';
 import { MaterialDefinitionCreateRequest, MaterialDefinitionService, MaterialDefinitionUpdateRequest } from '../../services/material-definition-service';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
@@ -7,7 +7,7 @@ import { Table, TableModule } from 'primeng/table';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputIconModule } from 'primeng/inputicon';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService, TreeNode } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -15,10 +15,12 @@ import { MaterialDefinitionDialog } from '../../components/material-definition-d
 import { MaterialDefinitionDialogData } from '../../components/material-definition-dialog/material-definition-dialog-data.model';
 import { Router, RouterLink } from '@angular/router';
 import { TooltipModule } from 'primeng/tooltip';
+import { TagModule } from 'primeng/tag';
+import { TreeTable, TreeTableModule } from 'primeng/treetable';
 
 @Component({
     selector: 'app-material-definition-list',
-    imports: [ToolbarModule, ButtonModule, TableModule, IconFieldModule, InputTextModule, InputIconModule, ToastModule, ConfirmDialogModule, RouterLink, TooltipModule],
+    imports: [TreeTableModule, TagModule, ToolbarModule, ButtonModule, TableModule, IconFieldModule, InputTextModule, InputIconModule, ToastModule, ConfirmDialogModule, RouterLink, TooltipModule],
     templateUrl: './material-definition-list.html',
     styleUrl: './material-definition-list.scss',
     providers: [ConfirmationService, MessageService, DialogService]
@@ -34,6 +36,32 @@ export class MaterialDefinitionList implements OnInit {
     materials = this.materialDefinitionService.materialDefinitions;
     loading = this.materialDefinitionService.loading;
     error = this.materialDefinitionService.error;
+    selectedNodes!: TreeNode | TreeNode[] | null;
+    groupedMaterials = computed<TreeNode[]>(() => {
+        const raw = this.materials();
+        const groups: Record<string, TreeNode> = {};
+
+        raw.forEach((m) => {
+            if (!groups[m.sku]) {
+                groups[m.sku] = {
+                    data: {
+                        sku: m.sku,
+                        name: m.name,
+                        isGroup: true // Helper flag
+                    },
+                    children: [],
+                    expanded: false
+                };
+            }
+
+            // Add the version as a child
+            groups[m.sku].children?.push({
+                data: { ...m, isGroup: false }
+            });
+        });
+
+        return Object.values(groups);
+    });
 
     selectedMaterialDefinitions!: MaterialDefinition[] | null;
 
@@ -48,6 +76,11 @@ export class MaterialDefinitionList implements OnInit {
 
     onGlobalFilter(table: Table, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    }
+
+    onGlobalFilter2(treeTable: TreeTable, event: Event) {
+        const val = (event.target as HTMLInputElement).value;
+        treeTable.filterGlobal(val, 'contains');
     }
 
     exportCSV(): void {
@@ -126,5 +159,18 @@ export class MaterialDefinitionList implements OnInit {
                 this.messageService.add({ severity: 'info', summary: 'Rejected', detail: 'Material Definition deletion rejected' });
             }
         });
+    }
+
+    getSeverity(state: string) {
+        switch (state?.toLowerCase()) {
+            case 'released':
+                return 'success';
+            case 'draft':
+                return 'info';
+            case 'obsolete':
+                return 'danger';
+            default:
+                return 'secondary';
+        }
     }
 }

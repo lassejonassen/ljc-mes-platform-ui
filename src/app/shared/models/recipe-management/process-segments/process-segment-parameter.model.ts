@@ -7,6 +7,5 @@ export interface ProcessSegmentParameter {
     dataType?: string;
     description?: string;
     isReadOnly: boolean;
-    defaultValue: string;
     processSegmentId: string;
 }

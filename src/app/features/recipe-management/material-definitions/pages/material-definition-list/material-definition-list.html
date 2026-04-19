@@ -39,6 +39,8 @@
                 </th>
                 <th pSortableColumn="sku" style="min-width: 16rem">SKU <p-sortIcon field="sku" /></th>
                 <th pSortableColumn="name" style="min-width: 16rem">Name <p-sortIcon field="Name" /></th>
+                <th pSortableColumn="state" style="min-width: 16rem">State <p-sortIcon field="state" /></th>
+                <th pSortableColumn="version" style="min-width: 16rem">Version <p-sortIcon field="version" /></th>
                 <th style="min-width: 12rem"></th>
             </tr>
         </ng-template>
@@ -49,6 +51,8 @@
                 </td>
                 <td style="min-width: 12rem">{{ material.sku }}</td>
                 <td style="min-width: 16rem">{{ material.name }}</td>
+                <td style="min-width: 16rem">{{ material.state }}</td>
+                <td style="min-width: 16rem">{{ material.version }}</td>
                 <td>
                     <p-button icon="pi pi-eye" severity="info" class="mr-2" [rounded]="true" [outlined]="true" [routerLink]="['/recipe-management/material-definitions', material.id]" pTooltip="View Details" />
                     <p-button icon="pi pi-pencil" severity="warn" class="mr-2" [rounded]="true" [outlined]="true" (click)="showMaterialDefinitionDialog(material)" pTooltip="Edit" />
@@ -57,6 +61,147 @@
             </tr>
         </ng-template>
     </p-table>
+</div>
+
+<div class="card">
+    <div class="font-semibold text-xl mb-4">Material Definitions</div>
+
+    <p-toolbar class="mb-6">
+        <ng-template #start>
+            <p-button label="Add" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="showMaterialDefinitionDialog()" />
+            <p-button label="Delete" icon="pi pi-trash" severity="danger" class="mr-2" (onClick)="deleteSelected()" [disabled]="!selectedMaterialDefinitions || !selectedMaterialDefinitions.length" />
+        </ng-template>
+        <ng-template #end>
+            <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+        </ng-template>
+    </p-toolbar>
+
+    <p-treeTable [value]="groupedMaterials()" [paginator]="true" [rows]="10" [tableStyle]="{ 'min-width': '75rem' }" selectionMode="checkbox" [(selection)]="selectedMaterialDefinitions">
+        <ng-template #header>
+            <tr>
+                <th style="width: 20rem">SKU / Name</th>
+                <th>State</th>
+                <th>Version</th>
+                <th style="width: 12rem">Actions</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-rowNode let-rowData="rowData">
+            <tr [ttRow]="rowNode">
+                <td>
+                    <p-treeTableToggler [rowNode]="rowNode" />
+                    <span class="font-bold">{{ rowData.sku }}</span>
+                    @if (rowData.isGroup) {
+                    <span class="text-500 ml-2">{{ rowData.name }}</span>
+                    } @if (!rowData.isGroup) {
+                    <span>{{ rowData.name }}</span>
+                    }
+                </td>
+                <td>
+                    @if (rowData.isGroup) {
+                    <p-tag [value]="rowData.state" [severity]="getSeverity(rowData.state)" />
+
+                    }
+                </td>
+                <td>
+                    @if(!rowData.isGroup) {
+                    <span class="font-mono">{{ rowData.version }}</span>
+
+                    }
+                </td>
+                <td>
+                    @if (!rowData.isGroup) {
+                    <div class="flex gap-2">
+                        <p-button icon="pi pi-eye" severity="info" [rounded]="true" [outlined]="true" [routerLink]="['/recipe-management/material-definitions', rowData.id]" />
+                        <p-button icon="pi pi-pencil" severity="warn" [rounded]="true" [outlined]="true" (onClick)="showMaterialDefinitionDialog(rowData)" />
+                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (onClick)="openDeleteDialog(rowData)" />
+                    </div>
+                    }
+                </td>
+            </tr>
+        </ng-template>
+    </p-treeTable>
+</div>
+
+<div class="card">
+    <div class="font-semibold text-xl mb-4">Material Definitions</div>
+
+    <p-toolbar class="mb-6">
+        <ng-template #start>
+            <p-button label="Add" icon="pi pi-plus" class="mr-2" (onClick)="showMaterialDefinitionDialog()" />
+            <p-button label="Delete" icon="pi pi-trash" severity="danger" [disabled]="!selectedNodes" />
+        </ng-template>
+        <ng-template #end>
+            <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+        </ng-template>
+    </p-toolbar>
+
+    <p-treeTable
+        #tt
+        [value]="groupedMaterials()"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 20, 50]"
+        [globalFilterFields]="['sku', 'name', 'state', 'version']"
+        selectionMode="checkbox"
+        [(selection)]="selectedNodes"
+        [scrollable]="true"
+        scrollHeight="600px"
+        [tableStyle]="{ 'min-width': '75rem' }"
+    >
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <h5 class="m-0">Hierarchical View (SKU > Versions)</h5>
+                <p-iconfield>
+                    <p-inputicon class="pi pi-search" />
+                    <input pInputText type="text" (input)="onGlobalFilter2(tt, $event)" placeholder="Search Materials..." />
+                </p-iconfield>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th style="width: 25%">SKU / Name</th>
+                <th style="width: 15%">State</th>
+                <th style="width: 15%">Version</th>
+                <th style="width: 20%">Actions</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-rowNode let-rowData="rowData">
+            <tr [ttRow]="rowNode">
+                <td>
+                    <p-treeTableToggler [rowNode]="rowNode" />
+                    <span [class.font-bold]="rowData.isGroup">{{ rowData.sku }}</span>
+
+                    @if (rowData.isGroup) {
+                    <span class="ml-2 text-500">({{ rowData.name }})</span>
+                    } @else {
+                    <span>{{ rowData.name }}</span>
+                    }
+                </td>
+                <td>
+                    @if (!rowData.isGroup) {
+                    <p-tag [value]="rowData.state" [severity]="getSeverity(rowData.state)" />
+                    }
+                </td>
+                <td>
+                    @if (!rowData.isGroup) {
+                    <span class="font-mono">{{ rowData.version }}</span>
+                    }
+                </td>
+                <td>
+                    @if (!rowData.isGroup) {
+                    <div class="flex gap-2">
+                        <p-button icon="pi pi-eye" severity="info" [rounded]="true" [outlined]="true" [routerLink]="['/recipe-management/material-definitions', rowData.id]" pTooltip="View" />
+                        <p-button icon="pi pi-pencil" severity="warn" [rounded]="true" [outlined]="true" (onClick)="showMaterialDefinitionDialog(rowData)" pTooltip="Edit" />
+                        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (onClick)="openDeleteDialog(rowData)" pTooltip="Delete" />
+                    </div>
+                    }
+                </td>
+            </tr>
+        </ng-template>
+    </p-treeTable>
 </div>
 
 <p-confirmdialog />

@@ -11,7 +11,7 @@ import { Table, TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TooltipModule } from 'primeng/tooltip';
-import { ProcessSegmentParameterCreateRequest, ProcessSegmentParameterUpdateRequest, ProcessSegmentService } from '../../services/process-segment-service';
+import { ProcessSegmentDraftCreateRequest, ProcessSegmentParameterCreateRequest, ProcessSegmentParameterUpdateRequest, ProcessSegmentService } from '../../services/process-segment-service';
 import { ProcessSegmentParameter } from '@/app/shared/models/recipe-management/process-segments/process-segment-parameter.model';
 import { ProcessSegmentParameterDialogData } from '../../components/process-segment-parameter-dialog/process-segment-parameter-dialog-data.model';
 import { ProcessSegmentParameterDialog } from '../../components/process-segment-parameter-dialog/process-segment-parameter-dialog';
@@ -120,6 +120,32 @@ export class ProcessSegmentDetail implements OnInit {
     }
 
     exportCSV(): void {}
+
+    openNewReleaseDialog(): void {
+        this.confirmationService.confirm({
+            message: `Are you sure you want to create a new draft of Process Segment: ${this.processSegment.name} `,
+            header: 'Danger Zone',
+            icon: 'pi pi-info-circle',
+            rejectLabel: 'Cancel',
+            rejectButtonProps: {
+                label: 'Cancel',
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptButtonProps: {
+                label: 'Create',
+                severity: 'primary'
+            },
+            accept: () => {
+                this.processSegmentService.createDraft(this.processSegmentId, { processSegmentId: this.processSegmentId } as ProcessSegmentDraftCreateRequest).subscribe({
+                    next: () => this.showSuccess('Draft created')
+                });
+            },
+            reject: () => {
+                this.messageService.add({ severity: 'info', summary: 'Rejected', detail: 'Process Segment new release rejected' });
+            }
+        });
+    }
 
     private showSuccess(message: string) {
         this.messageService.add({

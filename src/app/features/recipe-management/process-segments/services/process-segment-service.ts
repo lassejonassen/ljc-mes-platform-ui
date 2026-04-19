@@ -8,6 +8,10 @@ export interface ProcessSegmentCreateRequest {
     name: string;
 }
 
+export interface ProcessSegmentDraftCreateRequest {
+    processSegmentId: string;
+}
+
 export interface ProcessSegmentUpdateRequest {
     processSegmentId: string;
     name: string;
@@ -24,7 +28,6 @@ export interface ProcessSegmentParameterCreateRequest {
     dataType?: string;
     description?: string;
     isReadOnly: boolean;
-    defaultValue: string;
 }
 
 export interface ProcessSegmentParameterUpdateRequest {
@@ -35,7 +38,6 @@ export interface ProcessSegmentParameterUpdateRequest {
     dataType?: string;
     description?: string;
     isReadOnly: boolean;
-    defaultValue: string;
 }
 
 @Injectable({
@@ -75,6 +77,22 @@ export class ProcessSegmentService {
         this.startRequest();
 
         return this.httpClient.post<string>(this.API_URL, request).pipe(
+            // switchMap "switches" the stream from the ID response to the GetById response
+            switchMap((res) => this.getById(res)),
+
+            tap((newSegment) => {
+                // Now you are pushing the actual server-validated object into your list
+                this._processSegments.update((items) => [...items, newSegment]);
+            }),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false))
+        );
+    }
+
+    createDraft(id: string, request: ProcessSegmentDraftCreateRequest): Observable<ProcessSegment> {
+        this.startRequest();
+
+        return this.httpClient.post<string>(`${this.API_URL}/${id}/drafts`, request).pipe(
             // switchMap "switches" the stream from the ID response to the GetById response
             switchMap((res) => this.getById(res)),
 

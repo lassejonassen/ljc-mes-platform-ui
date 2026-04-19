@@ -4,6 +4,7 @@
         <ng-template #start>
             <p-button label="Add" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="showProcessSegmentDialog()" />
             <p-button label="Delete" icon="pi pi-trash" severity="danger" class="mr-2" (onClick)="deleteSelected()" [disabled]="!selectedProcessSegments || !selectedProcessSegments.length" />
+            <p-button label="Refresh" [outlined]="true" icon="pi pi-refresh" severity="info" class="mr-2" (onClick)="refresh()" />
         </ng-template>
         <ng-template #end>
             <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
@@ -37,7 +38,9 @@
                 <th style="width: 3 rem">
                     <p-tableHeaderCheckbox />
                 </th>
-                <th pSortableColumn="name" style="min-width: 16rem">Name <p-sortIcon field="Name" /></th>
+                <th pSortableColumn="name" style="min-width: 16rem">Name <p-sortIcon field="name" /></th>
+                <th pSortableColumn="name" style="min-width: 16rem">State <p-sortIcon field="state" /></th>
+                <th pSortableColumn="name" style="min-width: 16rem">Version <p-sortIcon field="version" /></th>
                 <th style="min-width: 12rem"></th>
             </tr>
         </ng-template>
@@ -47,6 +50,8 @@
                     <p-tableCheckbox [value]="processSegment" />
                 </td>
                 <td style="min-width: 16rem">{{ processSegment.name }}</td>
+                <td style="min-width: 16rem">{{ processSegment.state }}</td>
+                <td style="min-width: 16rem">{{ processSegment.version }}</td>
                 <td>
                     <p-button icon="pi pi-eye" severity="info" class="mr-2" [rounded]="true" [outlined]="true" [routerLink]="['/recipe-management/process-segments', processSegment.id]" pTooltip="View Details" />
                     <p-button icon="pi pi-pencil" severity="warn" class="mr-2" [rounded]="true" [outlined]="true" (click)="showProcessSegmentDialog(processSegment)" pTooltip="Edit" />

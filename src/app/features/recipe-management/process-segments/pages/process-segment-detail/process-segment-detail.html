@@ -3,7 +3,8 @@
     <h2>Details for: {{ item.name }}</h2>
     <p><strong>Version:</strong> {{ item.version }}</p>
     <p><strong>Database ID:</strong> {{ item.id }}</p>
-    <button pButton label="Back to List" routerLink="/recipe-management/process-segments"></button>
+    <button class="mr-2" pButton label="Back to List" routerLink="/recipe-management/process-segments"></button>
+    <p-button [outlined]="true" label="New release" (onClick)="openNewReleaseDialog()"></p-button>
 </div>
 <div class="card">
     <div class="font-semibold text-xl mb-4">Process Segment Parameters</div>

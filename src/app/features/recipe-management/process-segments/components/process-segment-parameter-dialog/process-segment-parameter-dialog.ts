@@ -64,7 +64,6 @@ export class ProcessSegmentParameterDialog implements OnInit {
                     value: rawValue.defaultValue,
                     description: rawValue.description,
                     dataType: rawValue.dataType,
-                    defaultValue: rawValue.defaultValue,
                     isReadOnly: rawValue.isReadOnly
                 };
                 this.ref.close(updateRequest);
@@ -75,7 +74,6 @@ export class ProcessSegmentParameterDialog implements OnInit {
                     value: rawValue.defaultValue,
                     description: rawValue.description,
                     dataType: rawValue.dataType,
-                    defaultValue: rawValue.defaultValue,
                     isReadOnly: rawValue.isReadOnly
                 };
                 this.ref.close(createRequest);
