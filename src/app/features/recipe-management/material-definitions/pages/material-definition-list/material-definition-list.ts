@@ -137,7 +137,56 @@ export class MaterialDefinitionList implements OnInit {
         });
     }
 
-    deleteSelected(): void {}
+    deleteSelected(): void {
+        // 1. Ensure there is a selection
+        if (!this.selectedNodes || (Array.isArray(this.selectedNodes) && this.selectedNodes.length === 0)) {
+            return;
+        }
+
+        // 2. Normalize selection to an array and extract IDs
+        // We filter out nodes where isGroup is true (the parent SKU folders)
+        // to ensure we only send actual record IDs to the service.
+        const nodes = Array.isArray(this.selectedNodes) ? this.selectedNodes : [this.selectedNodes];
+        const selectedIds = nodes.filter((node) => !node.data.isGroup).map((node) => node.data.id);
+
+        if (selectedIds.length === 0) return;
+
+        // 3. Open Confirmation Dialog
+        this.confirmationService.confirm({
+            message: `Are you sure you want to delete the ${selectedIds.length} selected material definition(s)?`,
+            header: 'Confirm Bulk Deletion',
+            icon: 'pi pi-exclamation-triangle',
+            rejectLabel: 'Cancel',
+            rejectButtonProps: {
+                label: 'Cancel',
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptButtonProps: {
+                label: 'Delete All',
+                severity: 'danger'
+            },
+            accept: () => {
+                // 4. Call service for each ID (or use a bulk delete method if your API supports it)
+                // Using forkJoin or similar is ideal for multiple requests, but following your existing pattern:
+                selectedIds.forEach((id) => {
+                    this.materialDefinitionService.delete(id).subscribe({
+                        next: () => {
+                            // Clear selection after successful deletion
+                            this.selectedNodes = null;
+                        }
+                    });
+                });
+
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'Selected Material Definitions Deleted',
+                    life: 3000
+                });
+            }
+        });
+    }
     openDeleteDialog(materialDefinition: MaterialDefinition): void {
         this.confirmationService.confirm({
             message: `Are you sure you want to delete Material Definition: ${materialDefinition.sku} (${materialDefinition.name})`,

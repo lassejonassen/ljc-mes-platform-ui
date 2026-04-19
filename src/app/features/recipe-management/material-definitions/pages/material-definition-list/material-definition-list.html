@@ -4,7 +4,7 @@
     <p-toolbar class="mb-6">
         <ng-template #start>
             <p-button label="Add" icon="pi pi-plus" class="mr-2" (onClick)="showMaterialDefinitionDialog()" />
-            <p-button label="Delete" icon="pi pi-trash" severity="danger" [disabled]="!selectedNodes" />
+            <p-button label="Delete" icon="pi pi-trash" severity="danger" (onClick)="deleteSelected()" [disabled]="!selectedNodes" />
         </ng-template>
         <ng-template #end>
             <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />

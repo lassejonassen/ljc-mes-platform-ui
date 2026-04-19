@@ -20,8 +20,9 @@
     <div class="font-semibold text-xl mb-4">Material Definition Properties</div>
     <p-toolbar class="mb-6">
         <ng-template #start>
-            <p-button label="Add" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="showMaterialDefinitionPropertyDialog()" [pTooltip]="isReadOnly() ? 'Add Unavailable' : 'Add'" [disabled]="isReadOnly" />
-            <p-button label="Delete" icon="pi pi-trash" severity="danger" class="mr-2" (onClick)="deleteSelected()" [disabled]="!selectedMaterialDefinitionProperties || !selectedMaterialDefinitionProperties.length || isReadOnly" />
+            <p-button label="Add" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="showMaterialDefinitionPropertyDialog()" [pTooltip]="isReadOnly() ? 'Add Unavailable' : 'Add'" [disabled]="isReadOnly()" />
+
+            <p-button label="Delete" icon="pi pi-trash" severity="danger" (onClick)="deleteSelected()" [disabled]="!selectedMaterialDefinitionProperties || !selectedMaterialDefinitionProperties.length || isReadOnly()" />
         </ng-template>
         <ng-template #end>
             <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
@@ -80,9 +81,9 @@
                         [outlined]="true"
                         (click)="showMaterialDefinitionPropertyDialog(property)"
                         [pTooltip]="isReadOnly() ? 'Edit Unavailable' : 'Edit'"
-                        [disabled]="isReadOnly"
+                        [disabled]="isReadOnly()"
                     />
-                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="openDeleteDialog(property)" [pTooltip]="isReadOnly() ? 'Delete Unavailable' : 'Delete'" [disabled]="isReadOnly" />
+                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="openDeleteDialog(property)" [pTooltip]="isReadOnly() ? 'Delete Unavailable' : 'Delete'" [disabled]="isReadOnly()" />
                 </td>
             </tr>
         </ng-template>
