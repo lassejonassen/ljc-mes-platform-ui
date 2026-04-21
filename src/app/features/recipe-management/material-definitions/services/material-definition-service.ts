@@ -65,6 +65,9 @@ export class MaterialDefinitionService {
     private readonly _materialDefinition = signal<MaterialDefinition | undefined>(undefined);
     readonly materialDefinition = this._materialDefinition.asReadonly();
 
+    private readonly _latestVersion = signal<number | undefined>(undefined);
+    readonly latestVersion = this._latestVersion.asReadonly();
+
     getAll(): Observable<MaterialDefinition[]> {
         this.startRequest();
         return this.httpClient.get<MaterialDefinitionListResponse>(this.API_URL).pipe(
@@ -78,6 +81,10 @@ export class MaterialDefinitionService {
 
     getById(id: string | number): Observable<MaterialDefinition> {
         return this.httpClient.get<MaterialDefinition>(`${this.API_URL}/${id}`).pipe(tap((data) => this._materialDefinition.set(data)));
+    }
+
+    getLatestVersion(id: string | number): Observable<number> {
+        return this.httpClient.get<number>(`${this.API_URL}/${id}/latest-version`).pipe();
     }
 
     create(request: MaterialDefinitionCreateRequest): Observable<MaterialDefinition> {

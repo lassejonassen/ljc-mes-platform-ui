@@ -12,7 +12,7 @@
     } @if (item.state === 'Draft') {
     <p-button [outlined]="true" label="Release" (onClick)="openReleaseDialog()"></p-button>
     } @if (item.state === 'Obsolete') {
-    <p-button class="mr-2" [outlined]="true" label="New release" (onClick)="openNewReleaseDialog()"></p-button>
+    <p-button class="mr-2" [outlined]="true" label="New release" [disabled]="!newReleaseAllowed()" (onClick)="openNewReleaseDialog()" [pTooltip]="newReleaseAllowed() ? 'New release' : 'New release only available on latest version'"></p-button>
     }
 </div>
 

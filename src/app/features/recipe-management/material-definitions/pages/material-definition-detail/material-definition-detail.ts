@@ -41,12 +41,18 @@ export class MaterialDefinitionDetail implements OnInit {
     private dialogService = inject(DialogService);
 
     material = this.materialDefinitionService.materialDefinition;
+    latestVersion = this.materialDefinitionService.latestVersion;
     loading = this.materialDefinitionService.loading;
     error = this.materialDefinitionService.error;
 
     isReadOnly = computed(() => {
         const state = this.material()?.state?.toLowerCase();
         return state === 'released' || state === 'obsolete';
+    });
+
+    newReleaseAllowed = computed(() => {
+        const allowed = this.material()?.version == this.latestVersion();
+        return allowed;
     });
 
     materialDefinitionId!: string;
@@ -64,6 +70,7 @@ export class MaterialDefinitionDetail implements OnInit {
                     // If your getById doesn't set the signal yet, see the Service adjustment below.
                 }
             });
+            this.materialDefinitionService.getLatestVersion(this.materialDefinitionId).subscribe();
         }
     }
 
