@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -11,7 +11,14 @@ import { Table, TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TooltipModule } from 'primeng/tooltip';
-import { ProcessSegmentDraftCreateRequest, ProcessSegmentParameterCreateRequest, ProcessSegmentParameterUpdateRequest, ProcessSegmentService } from '../../services/process-segment-service';
+import {
+    ProcessSegmentCreateDraftRequest,
+    ProcessSegmentDeprecateRequest,
+    ProcessSegmentParameterCreateRequest,
+    ProcessSegmentParameterUpdateRequest,
+    ProcessSegmentReleaseRequest,
+    ProcessSegmentService
+} from '../../services/process-segment-service';
 import { ProcessSegmentParameter } from '@/app/shared/models/recipe-management/process-segments/process-segment-parameter.model';
 import { ProcessSegmentParameterDialogData } from '../../components/process-segment-parameter-dialog/process-segment-parameter-dialog-data.model';
 import { ProcessSegmentParameterDialog } from '../../components/process-segment-parameter-dialog/process-segment-parameter-dialog';
@@ -39,6 +46,13 @@ export class ProcessSegmentDetail implements OnInit {
     loading = this.processSegmentService.loading;
     error = this.processSegmentService.error;
 
+    isReadOnly = computed(() => {
+        const state = this.processSegment()?.state?.toLowerCase();
+        return state === 'released' || state === 'obsolete';
+    });
+
+    readonly newReleaseAllowed = signal<boolean>(false);
+
     processSegmentId!: string;
     selectedParameters!: ProcessSegmentParameter[] | null;
 
@@ -49,9 +63,7 @@ export class ProcessSegmentDetail implements OnInit {
             // 2. We just trigger the call; the Service signal handles the data flow
             this.processSegmentService.getById(id).subscribe({
                 next: (data) => {
-                    // We update the service's private signal via a sync (if your service has the syncState helper)
-                    // Or simply ensure your getById in the service sets the signal.
-                    // If your getById doesn't set the signal yet, see the Service adjustment below.
+                    this.processSegmentService.getLatestVersion(id).subscribe((res) => this.newReleaseAllowed.set(res === this.processSegment()?.version));
                 }
             });
         }
@@ -93,6 +105,7 @@ export class ProcessSegmentDetail implements OnInit {
     }
 
     deleteSelected(): void {}
+
     openDeleteDialog(processSegmentParameter: ProcessSegmentParameter): void {
         this.confirmationService.confirm({
             message: `Are you sure you want to delete Process Segment Parameter: ${processSegmentParameter.name} `,
@@ -137,12 +150,70 @@ export class ProcessSegmentDetail implements OnInit {
                 severity: 'primary'
             },
             accept: () => {
-                this.processSegmentService.createDraft(this.processSegmentId, { processSegmentId: this.processSegmentId } as ProcessSegmentDraftCreateRequest).subscribe({
+                this.processSegmentService.createDraft(this.processSegmentId, { processSegmentId: this.processSegmentId } as ProcessSegmentCreateDraftRequest).subscribe({
                     next: () => this.showSuccess('Draft created')
                 });
             },
             reject: () => {
                 this.messageService.add({ severity: 'info', summary: 'Rejected', detail: 'Process Segment new release rejected' });
+            }
+        });
+    }
+
+    openReleaseDialog(): void {
+        this.confirmationService.confirm({
+            message: `Are you sure you want to release Process Segment: ${this.processSegment()!.name} `,
+            header: 'Danger Zone',
+            icon: 'pi pi-info-circle',
+            rejectLabel: 'Cancel',
+            rejectButtonProps: {
+                label: 'Cancel',
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptButtonProps: {
+                label: 'Create',
+                severity: 'primary'
+            },
+            accept: () => {
+                this.processSegmentService.release(this.processSegmentId, { id: this.processSegmentId } as ProcessSegmentReleaseRequest).subscribe({
+                    next: () => {
+                        this.showSuccess('Released');
+                        this.refresh(); // Now it refreshes AFTER the server is done
+                    }
+                });
+            },
+            reject: () => {
+                this.messageService.add({ severity: 'info', summary: 'Rejected', detail: 'Process Segment release rejected' });
+            }
+        });
+    }
+
+    openDeprecateDialog(): void {
+        this.confirmationService.confirm({
+            message: `Are you sure you want to deprecate Process Segment: ${this.processSegment()!.name} `,
+            header: 'Danger Zone',
+            icon: 'pi pi-info-circle',
+            rejectLabel: 'Cancel',
+            rejectButtonProps: {
+                label: 'Cancel',
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptButtonProps: {
+                label: 'Create',
+                severity: 'primary'
+            },
+            accept: () => {
+                this.processSegmentService.deprecate(this.processSegmentId, { id: this.processSegmentId } as ProcessSegmentDeprecateRequest).subscribe({
+                    next: () => {
+                        this.showSuccess('Deprecated');
+                        this.refresh(); // Now it refreshes AFTER the server is done
+                    }
+                });
+            },
+            reject: () => {
+                this.messageService.add({ severity: 'info', summary: 'Rejected', detail: 'Process Segment deprecation rejected' });
             }
         });
     }

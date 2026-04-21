@@ -1,0 +1,29 @@
+<div class="p-fluid">
+    <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="card flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+                <label for="name">Name</label>
+                <input id="name" type="text" pInputText formControlName="name" [readonly]="true" [invalid]="isInvalid('name')" />
+                <small id="username-help">The field is Read Only</small>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label for="description">Description</label>
+                <input id="description" type="text" pInputText formControlName="description" [readonly]="true" [invalid]="isInvalid('description')" />
+                <small id="username-help">The field is Read Only</small>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label for="dataType">Data Type</label>
+                <input id="dataType" type="text" pInputText formControlName="dataType" [readonly]="true" [invalid]="isInvalid('dataType')" />
+                <small id="username-help">The field is Read Only</small>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label for="value">Value</label>
+                <input id="value" type="text" pInputText formControlName="value" [invalid]="isInvalid('value')" />
+            </div>
+        </div>
+        <div class="flex justify-content-end gap-2 mt-4">
+            <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" type="button" (click)="cancel()"></button>
+            <button pButton label="Update" icon="pi pi-check" type="submit" [disabled]="form.invalid"></button>
+        </div>
+    </form>
+</div>

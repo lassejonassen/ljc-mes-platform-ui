@@ -1,66 +1,84 @@
 <div class="card">
     <div class="font-semibold text-xl mb-4">Process Segments</div>
+
     <p-toolbar class="mb-6">
         <ng-template #start>
-            <p-button label="Add" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="showProcessSegmentDialog()" />
-            <p-button label="Delete" icon="pi pi-trash" severity="danger" class="mr-2" (onClick)="deleteSelected()" [disabled]="!selectedProcessSegments || !selectedProcessSegments.length" />
-            <p-button label="Refresh" [outlined]="true" icon="pi pi-refresh" severity="info" class="mr-2" (onClick)="refresh()" />
+            <p-button label="Add" icon="pi pi-plus" class="mr-2" (onClick)="showProcessSegmentDialog()" />
+            <p-button label="Delete" icon="pi pi-trash" severity="danger" (onClick)="deleteSelected()" [disabled]="!selectedNodes" />
         </ng-template>
         <ng-template #end>
             <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
         </ng-template>
     </p-toolbar>
-    <p-table
-        #dt
-        [value]="processSegments()"
-        [rows]="10"
+
+    <p-treeTable
+        #tt
+        [value]="groupedProcessSegments()"
         [paginator]="true"
-        [globalFilterFields]="['sku', 'name']"
-        [tableStyle]="{ 'min-width': '75rem' }"
-        [(selection)]="selectedProcessSegments"
-        [rowHover]="true"
-        dataKey="id"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} process segments"
-        [showCurrentPageReport]="true"
-        [rowsPerPageOptions]="[10, 20, 30]"
+        [rows]="10"
+        [globalFilterFields]="['sku', 'name', 'state', 'version']"
+        selectionMode="checkbox"
+        [(selection)]="selectedNodes"
+        [scrollable]="true"
+        scrollHeight="600px"
+        class="custom-align-table"
     >
         <ng-template #caption>
             <div class="flex items-center justify-between">
                 <h5 class="m-0">Manage Process Segments</h5>
                 <p-iconfield>
                     <p-inputicon class="pi pi-search" />
-                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+                    <input pInputText type="text" (input)="onGlobalFilter(tt, $event)" placeholder="Search Process Segments..." />
                 </p-iconfield>
             </div>
         </ng-template>
+
         <ng-template #header>
             <tr>
-                <th style="width: 3 rem">
-                    <p-tableHeaderCheckbox />
-                </th>
-                <th pSortableColumn="name" style="min-width: 16rem">Name <p-sortIcon field="name" /></th>
-                <th pSortableColumn="name" style="min-width: 16rem">State <p-sortIcon field="state" /></th>
-                <th pSortableColumn="name" style="min-width: 16rem">Version <p-sortIcon field="version" /></th>
-                <th style="min-width: 12rem"></th>
+                <th style="width: 40%">Name</th>
+                <th style="width: 15%">Latest State</th>
+                <th style="width: 15%">Latest Version</th>
+                <th style="width: 20%">Actions</th>
             </tr>
         </ng-template>
-        <ng-template #body let-processSegment>
-            <tr>
-                <td style="width: 3rem">
-                    <p-tableCheckbox [value]="processSegment" />
+
+        <ng-template #body let-rowNode let-rowData="rowData">
+            <tr [ttRow]="rowNode" [class.parent-row]="rowData.isGroup">
+                <td style="width: 40%">
+                    <div class="flex items-center w-full">
+                        <p-treeTableToggler [rowNode]="rowNode" />
+                        <p-treeTableCheckbox [value]="rowNode" class="mr-3" />
+
+                        <div class="flex items-center gap-3 truncate">
+                            <span class="sku-text" [class.font-bold]="rowData.isGroup"> {{ rowData.sku }} </span>
+                            <span class="text-secondary text-sm"> {{ rowData.name }} </span>
+                        </div>
+                    </div>
                 </td>
-                <td style="min-width: 16rem">{{ processSegment.name }}</td>
-                <td style="min-width: 16rem">{{ processSegment.state }}</td>
-                <td style="min-width: 16rem">{{ processSegment.version }}</td>
-                <td>
-                    <p-button icon="pi pi-eye" severity="info" class="mr-2" [rounded]="true" [outlined]="true" [routerLink]="['/recipe-management/process-segments', processSegment.id]" pTooltip="View Details" />
-                    <p-button icon="pi pi-pencil" severity="warn" class="mr-2" [rounded]="true" [outlined]="true" (click)="showProcessSegmentDialog(processSegment)" pTooltip="Edit" />
-                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="openDeleteDialog(processSegment)" pTooltip="Delete" />
+                <td style="width: 15%">
+                    <p-tag [value]="rowData.state" [severity]="getSeverity(rowData.state)" />
+                </td>
+                <td style="width: 15%">
+                    <span class="version-badge"> v{{ rowData.version }} </span>
+                </td>
+                <td style="width: 20%">
+                    @if (!rowData.isGroup) {
+                    <div class="flex gap-1">
+                        <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" [routerLink]="['/recipe-management/process-segments', rowData.id]" pTooltip="View Details" />
+                        <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="warn" (onClick)="showProcessSegmentDialog(rowData)" pTooltip="Edit Version" />
+                        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="openDeleteDialog(rowData)" pTooltip="Delete Version" />
+                    </div>
+                    } @else {
+                    <span class="text-xs text-400 italic">Expand to manage versions</span>
+                    }
                 </td>
             </tr>
         </ng-template>
-    </p-table>
+    </p-treeTable>
 </div>
+
+<p-confirmdialog />
+<p-toast />
 
 <p-confirmdialog />
 <p-toast />

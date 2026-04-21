@@ -1,0 +1,60 @@
+<div class="p-fluid">
+    <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="card flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+                <label for="materialDefinitionId" class="font-semibold">Material Definition</label>
+                <p-select
+                    id="materialDefinition"
+                    formControlName="materialDefinition"
+                    [options]="materialDefinitions()"
+                    optionLabel="sku"
+                    optionValue="id"
+                    [filter]="true"
+                    filterBy="sku,name"
+                    appendTo="body"
+                    scrollHeight="250px"
+                    placeholder="Search by SKU or Name"
+                    class="w-full"
+                >
+                    <ng-template #option let-option>
+                        <div class="flex flex-col">
+                            <span class="font-bold">{{ option.sku }}</span>
+                            <small class="text-secondary text-xs">{{ option.name }}</small>
+                        </div>
+                    </ng-template>
+
+                    <ng-template #selectedItem let-selectedOption>
+                        @if (selectedOption) {
+                        <span>{{ selectedOption.sku }} - {{ selectedOption.name }}</span>
+                        } @else {
+                        <span>Select One</span>
+                        }
+                    </ng-template>
+                </p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label for="processSegmentId" class="font-semibold">Process Segment</label>
+                <p-select
+                    id="processSegment"
+                    formControlName="processSegment"
+                    [options]="processSegments()"
+                    optionLabel="name"
+                    optionValue="id"
+                    [filter]="true"
+                    filterBy="name"
+                    appendTo="body"
+                    scrollHeight="250px"
+                    placeholder="Search by Process Name"
+                    class="w-full"
+                >
+                </p-select>
+            </div>
+        </div>
+
+        <div class="flex justify-content-end gap-2 mt-4">
+            <p-button label="Cancel" icon="pi pi-times" [text]="true" (onClick)="cancel()" type="button" />
+            <p-button label="Create" icon="pi pi-check" type="submit" [disabled]="form.invalid" />
+        </div>
+    </form>
+</div>

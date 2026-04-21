@@ -87,6 +87,17 @@ export class MaterialDefinitionService {
         return this.httpClient.get<number>(`${this.API_URL}/${id}/latest-version`).pipe();
     }
 
+    getReleased(): Observable<MaterialDefinition[]> {
+        this.startRequest();
+        return this.httpClient.get<MaterialDefinitionListResponse>(`${this.API_URL}/released`).pipe(
+            map((res) => res.data),
+            tap((data) => this._materialDefinitions.set(data)),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false)),
+            shareReplay(1)
+        );
+    }
+
     create(request: MaterialDefinitionCreateRequest): Observable<MaterialDefinition> {
         this.startRequest();
 

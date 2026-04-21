@@ -8,5 +8,5 @@ export const environment = {
     applicationVersion: version,
     supportedLanguages: ['en-GB', 'da-DK'],
     defaultLanguage: 'en-GB',
-    apiBaseUrl: 'https://localhost:7294/api'
+    apiBaseUrl: 'http://localhost:5048/api'
 };

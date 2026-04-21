@@ -1,10 +1,12 @@
-@if (processSegment(); as item) {
+@if (productSegment(); as item) {
 <div class="card">
-    <h2>Details for: {{ item.name }}</h2>
+    <h2>Details for: {{ item.processSegmentName }}-{{ item.materialSku }}</h2>
     <p><strong>Database ID:</strong> {{ item.id }}</p>
     <p><strong>State:</strong> {{ item.state }}</p>
     <p><strong>Version:</strong> {{ item.version }}</p>
-    <button class="mr-2" pButton label="Back to List" routerLink="/recipe-management/process-segments"></button>
+    <p><strong>Material Defintion:</strong> {{ item.materialSku }} {{ item.materialName }}</p>
+    <p><strong>Process Segment:</strong> {{ item.processSegmentName }}</p>
+    <button class="mr-2" pButton label="Back to List" routerLink="/recipe-management/product-segments"></button>
     @if (item.state === 'Released' ) {
     <p-button class="mr-2" [outlined]="true" label="New release" (onClick)="openNewReleaseDialog()"></p-button>
     <p-button [outlined]="true" label="Deprecate" severity="warn" (onClick)="openDeprecateDialog()"></p-button>
@@ -17,17 +19,14 @@
 <div class="card">
     <div class="font-semibold text-xl mb-4">Process Segment Parameters</div>
     <p-toolbar class="mb-6">
-        <ng-template #start>
-            <p-button label="Add" icon="pi pi-plus" severity="primary" class="mr-2" (onClick)="showProcessSegmentParameterDialog()" [pTooltip]="isReadOnly() ? 'Add Unavailable' : 'Add'" [disabled]="isReadOnly()" />
-            <p-button label="Delete" icon="pi pi-trash" severity="danger" class="mr-2" (onClick)="deleteSelected()" [disabled]="!selectedParameters || !selectedParameters.length || isReadOnly()" />
-        </ng-template>
+        <ng-template #start></ng-template>
         <ng-template #end>
             <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
         </ng-template>
     </p-toolbar>
     <p-table
         #dt
-        [value]="processSegment()?.parameters ?? []"
+        [value]="productSegment()?.parameters ?? []"
         [rows]="10"
         [paginator]="true"
         [globalFilterFields]="['name', 'description', 'dataType', 'isReadOnly', 'defaultValue']"
@@ -41,7 +40,7 @@
     >
         <ng-template #caption>
             <div class="flex items-center justify-between">
-                <h5 class="m-0">Manage Process Segment Parameters</h5>
+                <h5 class="m-0">Manage Product Segment Parameters</h5>
                 <p-iconfield>
                     <p-inputicon class="pi pi-search" />
                     <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
@@ -55,7 +54,7 @@
                 </th>
                 <th pSortableColumn="name" style="min-width: 16rem">Name <p-sortIcon field="name" /></th>
                 <th pSortableColumn="description" style="min-width: 16rem">Description <p-sortIcon field="description" /></th>
-                <th pSortableColumn="defaultValue" style="min-width: 16rem">Default Value <p-sortIcon field="defaultValue" /></th>
+                <th pSortableColumn="value" style="min-width: 16rem">Value <p-sortIcon field="value" /></th>
                 <th pSortableColumn="dataType" style="min-width: 16rem">Data Type <p-sortIcon field="dataType" /></th>
                 <th pSortableColumn="isReadOnly" style="min-width: 16rem">Is Read Only <p-sortIcon field="isReadOnly" /></th>
                 <th style="min-width: 12rem"></th>
@@ -78,11 +77,10 @@
                         class="mr-2"
                         [rounded]="true"
                         [outlined]="true"
-                        (click)="showProcessSegmentParameterDialog(parameter)"
+                        (click)="showProductSegmentParameterDialog(parameter)"
                         [pTooltip]="isReadOnly() ? 'Edit Unavailable' : 'Edit'"
-                        [disabled]="isReadOnly()"
+                        [disabled]="isReadOnly() || parameter.isReadOnly"
                     />
-                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="openDeleteDialog(parameter)" [pTooltip]="isReadOnly() ? 'Delete Unavailable' : 'Delete'" [disabled]="isReadOnly()" />
                 </td>
             </tr>
         </ng-template>

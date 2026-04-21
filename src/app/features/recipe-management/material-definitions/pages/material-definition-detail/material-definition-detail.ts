@@ -41,7 +41,6 @@ export class MaterialDefinitionDetail implements OnInit {
     private dialogService = inject(DialogService);
 
     material = this.materialDefinitionService.materialDefinition;
-    latestVersion = this.materialDefinitionService.latestVersion;
     loading = this.materialDefinitionService.loading;
     error = this.materialDefinitionService.error;
 
@@ -50,10 +49,7 @@ export class MaterialDefinitionDetail implements OnInit {
         return state === 'released' || state === 'obsolete';
     });
 
-    newReleaseAllowed = computed(() => {
-        const allowed = this.material()?.version == this.latestVersion();
-        return allowed;
-    });
+    readonly newReleaseAllowed = signal<boolean>(false);
 
     materialDefinitionId!: string;
     selectedMaterialDefinitionProperties!: MaterialDefinitionProperty[] | null;
@@ -65,12 +61,9 @@ export class MaterialDefinitionDetail implements OnInit {
             // 2. We just trigger the call; the Service signal handles the data flow
             this.materialDefinitionService.getById(id).subscribe({
                 next: (data) => {
-                    // We update the service's private signal via a sync (if your service has the syncState helper)
-                    // Or simply ensure your getById in the service sets the signal.
-                    // If your getById doesn't set the signal yet, see the Service adjustment below.
+                    this.materialDefinitionService.getLatestVersion(id).subscribe((res) => this.newReleaseAllowed.set(res === this.material()?.version));
                 }
             });
-            this.materialDefinitionService.getLatestVersion(this.materialDefinitionId).subscribe();
         }
     }
 

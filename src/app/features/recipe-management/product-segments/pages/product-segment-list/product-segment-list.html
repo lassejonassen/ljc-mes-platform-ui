@@ -1,4 +1,87 @@
 <div class="card">
     <div class="font-semibold text-xl mb-4">Product Segments</div>
-    <p>product-segment-list works!</p>
+
+    <p-toolbar class="mb-6">
+        <ng-template #start>
+            <p-button label="Add" icon="pi pi-plus" class="mr-2" (onClick)="showProductSegmentDialog()" />
+            <p-button label="Delete" icon="pi pi-trash" severity="danger" (onClick)="deleteSelected()" [disabled]="!selectedNodes" />
+        </ng-template>
+        <ng-template #end>
+            <p-button label="Export" icon="pi pi-download" severity="secondary" (onClick)="exportCSV()" />
+        </ng-template>
+    </p-toolbar>
+
+    <p-treeTable
+        #tt
+        [value]="groupedProductSegments()"
+        [paginator]="true"
+        [rows]="10"
+        [globalFilterFields]="['processSegmentName', 'materialSku', 'materialName', 'state', 'version']"
+        selectionMode="checkbox"
+        [(selection)]="selectedNodes"
+        [scrollable]="true"
+        scrollHeight="600px"
+        class="custom-align-table"
+    >
+        <ng-template #caption>
+            <div class="flex items-center justify-between">
+                <h5 class="m-0">Manage Product Segments</h5>
+                <p-iconfield>
+                    <p-inputicon class="pi pi-search" />
+                    <input pInputText type="text" (input)="onGlobalFilter(tt, $event)" placeholder="Search Product Segments..." />
+                </p-iconfield>
+            </div>
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th style="width: 35%">Process Segment</th>
+                <th style="width: 30%">Material Definition</th>
+                <th style="width: 15%">State</th>
+                <th style="width: 10%">Version</th>
+                <th style="width: 10%">Actions</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-rowNode let-rowData="rowData">
+            <tr [ttRow]="rowNode" [class.parent-row]="rowData.isGroup">
+                <td style="width: 35%">
+                    <div class="flex items-center">
+                        <p-treeTableToggler [rowNode]="rowNode" />
+                        <p-treeTableCheckbox [value]="rowNode" class="mr-2" />
+                        <span [class.font-bold]="rowData.isGroup"> {{ rowData.processSegmentName }} </span>
+                    </div>
+                </td>
+
+                <td style="width: 30%">
+                    @if (!rowData.isGroup) {
+                    <div class="flex flex-col align-items-start">
+                        <span class="font-medium text-900 line-height-2"> {{ rowData.materialSku }} </span>
+                        <span class="text-sm text-secondary line-height-1"> {{ rowData.materialName }} </span>
+                    </div>
+                    }
+                </td>
+
+                <td style="width: 15%">
+                    <p-tag [value]="rowData.state" [severity]="getSeverity(rowData.state)" />
+                </td>
+
+                <td style="width: 10%">
+                    <span class="version-badge font-mono text-sm"> v{{ rowData.version }} </span>
+                </td>
+
+                <td style="width: 10%">
+                    @if (!rowData.isGroup) {
+                    <div class="flex gap-1">
+                        <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" [routerLink]="['/recipe-management/product-segments', rowData.id]" pTooltip="View Details" />
+                        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="openDeleteDialog(rowData)" pTooltip="Delete Version" />
+                    </div>
+                    }
+                </td>
+            </tr>
+        </ng-template>
+    </p-treeTable>
 </div>
+
+<p-confirmdialog />
+<p-toast />

@@ -8,8 +8,16 @@ export interface ProcessSegmentCreateRequest {
     name: string;
 }
 
-export interface ProcessSegmentDraftCreateRequest {
+export interface ProcessSegmentCreateDraftRequest {
     processSegmentId: string;
+}
+
+export interface ProcessSegmentReleaseRequest {
+    id: string;
+}
+
+export interface ProcessSegmentDeprecateRequest {
+    id: string;
 }
 
 export interface ProcessSegmentUpdateRequest {
@@ -58,6 +66,9 @@ export class ProcessSegmentService {
     private readonly _processSegment = signal<ProcessSegment | undefined>(undefined);
     readonly processSegment = this._processSegment.asReadonly();
 
+    private readonly _latestVersion = signal<number | undefined>(undefined);
+    readonly latestVersion = this._latestVersion.asReadonly();
+
     getAll(): Observable<ProcessSegment[]> {
         this.startRequest();
         return this.httpClient.get<ProcessSegmentListResponse>(this.API_URL).pipe(
@@ -73,15 +84,28 @@ export class ProcessSegmentService {
         return this.httpClient.get<ProcessSegment>(`${this.API_URL}/${id}`).pipe(tap((data) => this._processSegment.set(data)));
     }
 
+    getLatestVersion(id: string | number): Observable<number> {
+        return this.httpClient.get<number>(`${this.API_URL}/${id}/latest-version`).pipe();
+    }
+
+    getReleased(): Observable<ProcessSegment[]> {
+        this.startRequest();
+        return this.httpClient.get<ProcessSegmentListResponse>(`${this.API_URL}/released`).pipe(
+            map((res) => res.data),
+            tap((data) => this._processSegments.set(data)),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false)),
+            shareReplay(1)
+        );
+    }
+
     create(request: ProcessSegmentCreateRequest): Observable<ProcessSegment> {
         this.startRequest();
 
         return this.httpClient.post<string>(this.API_URL, request).pipe(
-            // switchMap "switches" the stream from the ID response to the GetById response
             switchMap((res) => this.getById(res)),
 
             tap((newSegment) => {
-                // Now you are pushing the actual server-validated object into your list
                 this._processSegments.update((items) => [...items, newSegment]);
             }),
             catchError((err) => this.handleError(err)),
@@ -89,7 +113,7 @@ export class ProcessSegmentService {
         );
     }
 
-    createDraft(id: string, request: ProcessSegmentDraftCreateRequest): Observable<ProcessSegment> {
+    createDraft(id: string, request: ProcessSegmentCreateDraftRequest): Observable<ProcessSegment> {
         this.startRequest();
 
         return this.httpClient.post<string>(`${this.API_URL}/${id}/drafts`, request).pipe(
@@ -113,6 +137,34 @@ export class ProcessSegmentService {
             switchMap(() => this.getById(id)),
             tap((updatedSegment) => {
                 this.syncState(id, updatedSegment);
+            }),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false))
+        );
+    }
+
+    release(id: string | number, content: ProcessSegmentReleaseRequest): Observable<void> {
+        this.startRequest();
+
+        // We expect 'void' because of 204 No Content
+        return this.httpClient.patch<void>(`${this.API_URL}/${id}/release`, content).pipe(
+            tap(() => {
+                // Update the local signal using the data we sent to the server
+                this._processSegments.update((items) => items.map((item) => (item.id === id ? { ...item, ...content } : item)));
+            }),
+            catchError((err) => this.handleError(err)),
+            finalize(() => this.loading.set(false))
+        );
+    }
+
+    deprecate(id: string | number, content: ProcessSegmentDeprecateRequest): Observable<void> {
+        this.startRequest();
+
+        // We expect 'void' because of 204 No Content
+        return this.httpClient.patch<void>(`${this.API_URL}/${id}/deprecate`, content).pipe(
+            tap(() => {
+                // Update the local signal using the data we sent to the server
+                this._processSegments.update((items) => items.map((item) => (item.id === id ? { ...item, ...content } : item)));
             }),
             catchError((err) => this.handleError(err)),
             finalize(() => this.loading.set(false))

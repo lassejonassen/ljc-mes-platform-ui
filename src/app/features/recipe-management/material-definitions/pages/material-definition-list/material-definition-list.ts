@@ -73,8 +73,6 @@ export class MaterialDefinitionList implements OnInit {
         return Object.values(groups);
     });
 
-    selectedMaterialDefinitions!: MaterialDefinition[] | null;
-
     ngOnInit(): void {
         // Trigger the load - the Signal handles the notification.
         this.materialDefinitionService.getAll().subscribe();
@@ -84,11 +82,7 @@ export class MaterialDefinitionList implements OnInit {
         this.materialDefinitionService.getAll().subscribe();
     }
 
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-    }
-
-    onGlobalFilter2(treeTable: TreeTable, event: Event) {
+    onGlobalFilter(treeTable: TreeTable, event: Event) {
         const val = (event.target as HTMLInputElement).value;
         treeTable.filterGlobal(val, 'contains');
     }
@@ -187,6 +181,7 @@ export class MaterialDefinitionList implements OnInit {
             }
         });
     }
+
     openDeleteDialog(materialDefinition: MaterialDefinition): void {
         this.confirmationService.confirm({
             message: `Are you sure you want to delete Material Definition: ${materialDefinition.sku} (${materialDefinition.name})`,
