@@ -63,7 +63,11 @@ export class ProductSegmentDetail implements OnInit {
     }
 
     refresh(): void {
-        this.productSegmentService.getById(this.productSegmentId).subscribe();
+        this.productSegmentService.getById(this.productSegmentId).subscribe({
+            next: (data) => {
+                this.productSegmentService.getLatestVersion(this.productSegmentId).subscribe((res) => this.newReleaseAllowed.set(res === this.productSegment()?.version));
+            }
+        });
     }
 
     onGlobalFilter(table: Table, event: Event) {
@@ -110,7 +114,10 @@ export class ProductSegmentDetail implements OnInit {
             },
             accept: () => {
                 this.productSegmentService.createDraft(this.productSegmentId, { productSegmentId: this.productSegmentId } as ProductSegmentCreateDraftRequest).subscribe({
-                    next: () => this.showSuccess('Draft created')
+                    next: () => {
+                        this.showSuccess('Draft created');
+                        this.refresh();
+                    }
                 });
             },
             reject: () => {
@@ -164,7 +171,7 @@ export class ProductSegmentDetail implements OnInit {
                 severity: 'primary'
             },
             accept: () => {
-                this.productSegmentService.deprecate(this.productSegmentId, { productSegmentId: this.productSegmentId } as ProductSegmentDeprecateRequest).subscribe({
+                this.productSegmentService.deprecate(this.productSegmentId, { id: this.productSegmentId } as ProductSegmentDeprecateRequest).subscribe({
                     next: () => {
                         this.showSuccess('Deprecated');
                         this.refresh(); // Now it refreshes AFTER the server is done

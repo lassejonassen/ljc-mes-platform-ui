@@ -68,7 +68,11 @@ export class MaterialDefinitionDetail implements OnInit {
     }
 
     refresh(): void {
-        this.materialDefinitionService.getById(this.materialDefinitionId).subscribe();
+        this.materialDefinitionService.getById(this.materialDefinitionId).subscribe({
+            next: (data) => {
+                this.materialDefinitionService.getLatestVersion(this.materialDefinitionId).subscribe((res) => this.newReleaseAllowed.set(res === this.material()?.version));
+            }
+        });
     }
 
     onGlobalFilter(table: Table, event: Event) {
@@ -149,8 +153,8 @@ export class MaterialDefinitionDetail implements OnInit {
             accept: () => {
                 this.materialDefinitionService.createDraft(this.materialDefinitionId, { materialDefinitionId: this.materialDefinitionId } as MaterialDefinitionCreateDraftRequest).subscribe({
                     next: (res) => {
-                        this.router.navigate(['/recipe-management/material-definitions', res.id]);
                         this.showSuccess('Draft created');
+                        this.refresh();
                     }
                 });
             },

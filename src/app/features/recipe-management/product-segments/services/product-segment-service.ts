@@ -18,7 +18,7 @@ export interface ProductSegmentReleaseRequest {
 }
 
 export interface ProductSegmentDeprecateRequest {
-    productSegmentId: string;
+    id: string;
 }
 
 export interface ProductSegmentListResponse {

@@ -70,7 +70,11 @@ export class ProcessSegmentDetail implements OnInit {
     }
 
     refresh(): void {
-        this.processSegmentService.getById(this.processSegmentId).subscribe();
+        this.processSegmentService.getById(this.processSegmentId).subscribe({
+            next: (data) => {
+                this.processSegmentService.getLatestVersion(this.processSegmentId).subscribe((res) => this.newReleaseAllowed.set(res === this.processSegment()?.version));
+            }
+        });
     }
 
     onGlobalFilter(table: Table, event: Event) {
@@ -136,7 +140,7 @@ export class ProcessSegmentDetail implements OnInit {
 
     openNewReleaseDialog(): void {
         this.confirmationService.confirm({
-            message: `Are you sure you want to create a new draft of Process Segment: ${this.processSegment.name} `,
+            message: `Are you sure you want to create a new draft of Process Segment: ${this.processSegment()?.name} `,
             header: 'Danger Zone',
             icon: 'pi pi-info-circle',
             rejectLabel: 'Cancel',
@@ -151,7 +155,10 @@ export class ProcessSegmentDetail implements OnInit {
             },
             accept: () => {
                 this.processSegmentService.createDraft(this.processSegmentId, { processSegmentId: this.processSegmentId } as ProcessSegmentCreateDraftRequest).subscribe({
-                    next: () => this.showSuccess('Draft created')
+                    next: () => {
+                        this.showSuccess('Draft created');
+                        this.refresh();
+                    }
                 });
             },
             reject: () => {

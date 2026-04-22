@@ -4,4 +4,5 @@ export interface ProductSegmentParameter {
     value: string;
     description?: string;
     dataType?: string;
+    isReadOnly: boolean;
 }
