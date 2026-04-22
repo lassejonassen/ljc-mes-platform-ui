@@ -251,6 +251,39 @@ export class AppMenu {
                 ]
             },
             {
+                label: 'Operations Management',
+                path: '/operations-management',
+                items: [
+                    {
+                        label: 'Equipments',
+                        path: '/operations-management/equipments',
+                        routerLink: ['/operations-management/equipments'],
+                        icon: 'pi pi-fw pi-bookmark'
+                    },
+                    {
+                        label: 'Production Orders',
+                        path: '/operations-management/production-orders',
+                        routerLink: ['/operations-management/production-orders'],
+                        icon: 'pi pi-fw pi-bookmark'
+                    }
+                ]
+            },
+            {
+                label: 'Overall Equipment Efficiency',
+                path: '/oee',
+                items: []
+            },
+            {
+                label: 'Traceability',
+                path: '/traceability',
+                items: []
+            },
+            {
+                label: 'LIMS',
+                path: '/lims',
+                items: []
+            },
+            {
                 label: 'Get Started',
                 items: [
                     {

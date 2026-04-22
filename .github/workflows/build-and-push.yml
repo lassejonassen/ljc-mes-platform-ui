@@ -15,7 +15,7 @@ jobs:
       skipped: ${{ steps.check_tag.outputs.exists }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # Updated to v4 for stability
+        uses: actions/checkout@v6 # Updated to v4 for stability
         with:
           fetch-depth: 0
 
