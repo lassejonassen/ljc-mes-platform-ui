@@ -15,7 +15,8 @@ export const appRoutes: Routes = [
             { path: 'documentation', component: Documentation },
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') },
             { path: 'hr', loadChildren: () => import('./app/features/hr/hr.routes') },
-            { path: 'recipe-management', loadChildren: () => import('./app/features/recipe-management/recipe-management.routes') }
+            { path: 'recipe-management', loadChildren: () => import('./app/features/recipe-management/recipe-management.routes') },
+            { path: 'resource-execution', loadChildren: () => import('./app/features/resource-execution/resource-execution.routes') }
         ]
     },
     { path: 'landing', component: Landing },

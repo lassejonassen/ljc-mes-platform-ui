@@ -251,20 +251,42 @@ export class AppMenu {
                 ]
             },
             {
-                label: 'Operations Management',
-                path: '/operations-management',
+                label: 'Resource Execution',
+                path: '/resource-execution',
                 items: [
                     {
-                        label: 'Equipments',
-                        path: '/operations-management/equipments',
-                        routerLink: ['/operations-management/equipments'],
-                        icon: 'pi pi-fw pi-bookmark'
+                        label: 'Resource Management',
+                        path: '/resource-execution/resource-management',
+                        routerLink: ['/resource-execution/resource-management'],
+                        icon: 'pi pi-fw pi-bookmark',
+                        items: [
+                            {
+                                label: 'Equipment Classes',
+                                path: '/resource-execution/resource-management/equipment-classes',
+                                routerLink: ['/resource-execution/resource-management/equipment-classes'],
+                                icon: 'pi pi-fw pi-bookmark'
+                            },
+                            {
+                                label: 'Work Centers',
+                                path: '/resource-execution/resource-management/work-centers',
+                                routerLink: ['/resource-execution/resource-management/work-centers'],
+                                icon: 'pi pi-fw pi-bookmark'
+                            }
+                        ]
                     },
                     {
-                        label: 'Production Orders',
-                        path: '/operations-management/production-orders',
-                        routerLink: ['/operations-management/production-orders'],
-                        icon: 'pi pi-fw pi-bookmark'
+                        label: 'Production Execution',
+                        path: '/resource-management/production-execution',
+                        routerLink: ['/resource-management/production-execution'],
+                        icon: 'pi pi-fw pi-bookmark',
+                        items: [
+                            {
+                                label: 'Production Jobs',
+                                path: '/resource-management/production-execution/production-jobs',
+                                routerLink: ['/resource-management/production-execution/production-jobs'],
+                                icon: 'pi pi-fw pi-bookmark'
+                            }
+                        ]
                     }
                 ]
             },
